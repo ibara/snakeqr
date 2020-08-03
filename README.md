@@ -8,7 +8,7 @@ Here it is.
 ![SnakeQR as a QR code](snakeqr.png)
 
 This QR code is the compiled binary.
-The entire ELF executable clocks in at just under 2 KB (2042 bytes, to be exact).
+The entire ELF executable clocks in at just under 2 KB (2044 bytes, to be exact).
 
 Why?
 ----

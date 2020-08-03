@@ -326,9 +326,9 @@ do_move(int signo)
 	value.it_value.tv_sec = 0;
 	value.it_value.tv_usec = 100000;
 
-	setitimer(0, &value, (void *) 0);
-
 	move();
+
+	setitimer(0, &value, (void *) 0);
 }
 
 static void
