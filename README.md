@@ -12,9 +12,9 @@ The entire ELF executable clocks in at just under 2 KB (2042 bytes, to be exact)
 
 Why?
 ----
-I saw
-[this video](https://www.youtube.com/watch?v=ExwqNreocpg)
-and figured it should be recreated on the Unix terminal.
+Read my
+[blog post](https://briancallahan.net/blog/20200803.html)
+about this codebase.
 
 Building
 --------
