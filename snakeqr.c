@@ -72,7 +72,7 @@ struct sigaction {
 };
 
 static char direction;
-static char location[23][79];
+static short location[23][79];
 
 static int fruitx, fruity;
 static int snakex, snakey;
