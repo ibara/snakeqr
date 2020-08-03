@@ -1,0 +1,58 @@
+.\"
+.\" snakeqr = game of snake that fits on a QR code
+.\"
+.\" Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd August 3, 2020
+.Dt SNAKEQR 6
+.Os
+.Sh NAME
+.Nm snakeqr
+.Nd game of snake that fits on a QR code
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+is a game of snake that fits on a QR code.
+Control is via
+.Xr vi 1
+arrow keys.
+.Bl -tag -width Ds
+.It h
+Move left
+.It j
+Move down
+.It k
+Move up
+.It l
+Move right
+.El
+.Pp
+The goal of the game is to collect as many fruit, represented as
+.Sy % ,
+as possible.
+The game ends when the snake collides with a wall or a part of itself.
+.Sh EXIT STATUS
+The
+.Nm
+utility exits 0 on success, and >0 if an error occurs.
+.Sh AUTHORS
+.Nm
+was written by
+.An Brian Callahan Aq Mt bcallah@openbsd.org .
+.Sh CAVEATS
+.Nm
+was designed to have its compiled binary fit on a QR code.
+All security mitigations have been turned off to achieve this.
