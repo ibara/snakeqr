@@ -341,7 +341,7 @@ again:
 	snakex = buf[0];
 	snakey = buf[1];
 
-	if ((snakex < 8 || snakex > 72) || (snakey < 8 || snakey > 16) || (snakex == fruitx && snakey == fruity))
+	if ((snakex < 8 || snakex > 72) || (snakey < 8 || snakey > 16))
 		goto again;
 
 	location[snakey][snakex] = snakelen;
@@ -384,8 +384,8 @@ main(void)
 
 	system("stty cbreak -echo");
 
-	fruitplace();
 	snakeinit();
+	fruitplace();
 
 	drawscr();
 

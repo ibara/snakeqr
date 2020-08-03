@@ -15,5 +15,8 @@ all: ${OBJS}
 	/usr/bin/strip -R .comment ${PROG}
 	/usr/bin/gzexe ${PROG}
 
+qr:
+	qrencode -r ${PROG} -8 -o ${PROG}.png
+
 clean:
 	rm -rf ${PROG} ${OBJS} ${PROG}.core ${PROG}~
