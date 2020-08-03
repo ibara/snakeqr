@@ -20,7 +20,7 @@ Building
 --------
 Just run `make`.
 This will probably only run on
-[OpenBSD](https://www.openbsd.org)
+[OpenBSD](https://www.openbsd.org)/amd64
 as is.
 Feel free to port to your Unix of choice.
 
