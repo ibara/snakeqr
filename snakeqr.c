@@ -74,10 +74,10 @@ struct sigaction {
 static char direction;
 static short location[23][79];
 
-static int fruitx, fruity;
-static int snakex, snakey;
+static char fruitx, fruity;
+static char snakex, snakey;
 
-static unsigned long snakelen;
+static short snakelen;
 
 static void
 _exit(int status)
