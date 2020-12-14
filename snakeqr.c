@@ -18,7 +18,50 @@
  * snakeqr -- game of snake that fits in a QR code
  */
 
-extern void *_syscall(void *n, void *a, void *b, void *c, void *d, void *e);
+// syscall table
+#ifndef __linux__
+
+#define SYS_EXIT 1
+#define SYS_READ 3
+#define SYS_WRITE 4
+#define SYS_GETRANDOM 7
+#define SYS_WAIT4 11
+#define SYS_SIGACTION 46
+#define SYS_EXECVE 59
+#define SYS_VFORK 66
+#define SYS_SETITIMER 69
+
+#else
+#ifdef __amd64__
+
+#define SYS_EXIT 60
+#define SYS_READ 0
+#define SYS_WRITE 1
+#define SYS_GETRANDOM 318
+#define SYS_WAIT4 61
+#define SYS_RT_SIGACTION 13
+#define SYS_RT_SIGRETURN 15
+#define SYS_EXECVE 59
+#define SYS_CLONE 56
+#define SYS_SETITIMER 38
+
+#elif defined(__aarch64__)
+
+#define SYS_EXIT 93
+#define SYS_READ 63
+#define SYS_WRITE 64
+#define SYS_GETRANDOM 278
+#define SYS_WAIT4 260
+#define SYS_RT_SIGACTION 134
+#define SYS_RT_SIGRETURN 139
+#define SYS_EXECVE 221
+#define SYS_CLONE 220
+#define SYS_SETITIMER 103
+
+#endif // __aarch64__
+#endif // __linux__
+
+extern long _syscall(long number, ...);
 
 struct timeval {
 	long long tv_sec;
@@ -30,6 +73,7 @@ struct itimerval {
 	struct timeval it_value;
 };
 
+#ifndef __linux__
 union sigval {
 	int sival_int;
 	void *sival_ptr;
@@ -71,6 +115,15 @@ struct sigaction {
 	int sa_flags;
 };
 
+#else
+struct sigaction {
+    void (*sa_handler)(int);
+	unsigned long sa_flags;
+	void (*sa_restorer) (void);
+	unsigned long sa_mask;
+};
+#endif // __linux__
+
 static char direction;
 static short location[23][79];
 
@@ -82,64 +135,71 @@ static short snakelen;
 static void
 _exit(int status)
 {
-
-	_syscall((void *) 1, (void *) status, (void *) 0, (void *) 0, (void *) 0, (void *) 0);
+	_syscall(SYS_EXIT, status);
 }
 
 static long
 read(int d, void *buf, unsigned long nbytes)
 {
-
-	return (long) _syscall((void *) 3, (void *) d, (void *) buf, (void *) nbytes, (void *) 0, (void *) 0);
+	return _syscall(SYS_READ, d, buf, nbytes);
 }
 
 static void
 write(int d, const void *buf, unsigned long nbytes)
 {
-
-	_syscall((void *) 4, (void *) d, (void *) buf, (void *) nbytes, (void *) 0, (void *) 0);
+	_syscall(SYS_WRITE, d, buf, nbytes);
 }
 
 static void
 getentropy(void *buf, unsigned long buflen)
 {
-
-	_syscall((void *) 7, (void *) buf, (void *) buflen, (void *) 0, (void *) 0, (void *) 0);
+	_syscall(SYS_GETRANDOM, buf, buflen, 0);
 }
 
 static long
 wait4(int wpid, int *status, int options, void *rusage)
 {
-
-	return (long) _syscall((void *) 11, (void *) wpid, (void *) status, (void *) options, (void *) rusage, (void *) 0);
+	return _syscall(SYS_WAIT4, wpid, status, options, rusage);
 }
 
 static void
 sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 {
-
-	_syscall((void *) 46, (void *) sig, (void *) act, (void *) oact, (void *) 0, (void *) 0);
+#ifndef __linux__
+	_syscall(SYS_SIGACTION, sig, act, oact);
+#else
+    _syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
+#endif // __linux__
 }
+
+#if defined(__linux__) && defined(__amd64__)
+static void
+sigreturn(void)
+{
+    _syscall(SYS_RT_SIGRETURN);
+}
+#endif // __linux__ && __amd64__
 
 static void
 execve(const char *path, char *const argv[], char *const envp[])
 {
-
-	_syscall((void *) 59, (void *) path, (void *) argv, (void *) envp, (void *) 0, (void *) 0);
+	_syscall(SYS_EXECVE, path, argv, envp);
 }
 
 static long
 vfork(void)
 {
-
-	return (long) _syscall((void *) 66, (void *) 0, (void *) 0, (void *) 0, (void *) 0, (void *) 0);
+#ifndef __linux__
+	return _syscall(SYS_VFORK);
+#else
+	return _syscall(SYS_CLONE, 17, 0, 0, 0, 0);  // 17 = SIGCHLD
+#endif // __linux__
 }
 
 static void
 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
 {
-
-	_syscall((void *) 69, (void *) which, (void *) value, (void *) ovalue, (void *) 0, (void *) 0);
+	_syscall(SYS_SETITIMER, which, value, ovalue);
 }
 
 static void
@@ -170,7 +230,16 @@ timer(void (*cb)(int))
 
 	action.sa_mask = 0;
 	action.sa_flags = 0;
+#ifndef __linux__
 	action.__sigaction_u.__sa_handler = cb;
+#else
+	action.sa_handler = cb;
+	action.sa_restorer = (void *) 0;
+#ifdef __amd64__
+	action.sa_flags = 0x04000000;   // SA_RESTORER
+	action.sa_restorer = &sigreturn;
+#endif // __amd64__
+#endif // __linux__
 
 	sigaction(14, &action, (void *) 0);
 }
