@@ -117,7 +117,7 @@ struct sigaction {
 
 #else
 struct sigaction {
-    void (*sa_handler)(int);
+	void (*sa_handler)(int);
 	unsigned long sa_flags;
 	void (*sa_restorer) (void);
 	unsigned long sa_mask;
@@ -168,7 +168,7 @@ sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 #ifndef __linux__
 	_syscall(SYS_SIGACTION, sig, act, oact);
 #else
-    _syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
+	_syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
 #endif // __linux__
 }
 
@@ -176,7 +176,7 @@ sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 static void
 sigreturn(void)
 {
-    _syscall(SYS_RT_SIGRETURN);
+	_syscall(SYS_RT_SIGRETURN);
 }
 #endif // __linux__ && __amd64__
 
