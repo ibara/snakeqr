@@ -24,6 +24,10 @@ This will probably only run on
 as is.
 Feel free to port to your Unix of choice.
 
+The main branch supports OpenBSD/amd64. There are other branches on this repo that contain ports to other operating systems and CPU (e.g., Linux).
+Thanks to the following people for ports:
+@kenohassler for Linux/amd64 and Linux/aarch64
+
 Security
 --------
 To get a binary this small, virtually all of the OpenBSD mitigations you know and love have to be turned off.
