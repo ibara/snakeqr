@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef __linux__
 	.section ".note.openbsd.ident", "a"
 	.p2align 2
 	.long	0x8
@@ -42,3 +43,56 @@ _syscall:
 	syscall
 	retq
 	.size	_syscall,.-_syscall
+
+#else
+#ifdef __amd64__
+
+.globl _start
+.globl _syscall
+
+.text
+_start:
+	call    main
+	mov     $60, %rax
+	xor     %rdi, %rdi
+	syscall
+
+_syscall:
+	test    %al, %al
+	mov     %rdi, %rax
+	mov     %rsi, %rdi
+	mov     %rdx, %rsi
+	mov     %rcx, %rdx
+	mov     %r8, %r10
+	mov     %r9, %r8
+	je done
+	pop     %r9
+done:
+	syscall
+	ret
+
+#elif defined(__aarch64__)
+
+.globl _start
+.globl _syscall
+
+.text
+_start:
+	bl      main
+	mov     x0, #0
+	mov     w8, #93
+	svc     #0
+
+_syscall:
+	mov     x8, x0
+	mov     x0, x1
+	mov     x1, x2
+	mov     x2, x3
+	mov     x3, x4
+	mov     x4, x5
+	mov     x5, x6
+	svc     #0
+	ret
+
+#endif // __aarch64__
+#endif // __linux__
