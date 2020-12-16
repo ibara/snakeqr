@@ -13,9 +13,6 @@ all: ${OBJS}
 	/usr/bin/strip ${PROG}
 	/usr/bin/strip -R .comment ${PROG}
 
-compress:
-	/usr/bin/gzexe ${PROG}
-
 qr:
 	qrencode -r ${PROG} -8 -o ${PROG}.png
 

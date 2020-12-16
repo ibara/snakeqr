@@ -19,21 +19,6 @@
  */
 
 // syscall table
-#ifndef __linux__
-
-#define SYS_EXIT 1
-#define SYS_READ 3
-#define SYS_WRITE 4
-#define SYS_GETRANDOM 7
-#define SYS_WAIT4 11
-#define SYS_SIGACTION 46
-#define SYS_EXECVE 59
-#define SYS_VFORK 66
-#define SYS_SETITIMER 69
-
-#else
-#ifdef __amd64__
-
 #define SYS_EXIT 60
 #define SYS_READ 0
 #define SYS_WRITE 1
@@ -42,24 +27,8 @@
 #define SYS_RT_SIGACTION 13
 #define SYS_RT_SIGRETURN 15
 #define SYS_EXECVE 59
-#define SYS_CLONE 56
+#define SYS_FORK 57
 #define SYS_SETITIMER 38
-
-#elif defined(__aarch64__)
-
-#define SYS_EXIT 93
-#define SYS_READ 63
-#define SYS_WRITE 64
-#define SYS_GETRANDOM 278
-#define SYS_WAIT4 260
-#define SYS_RT_SIGACTION 134
-#define SYS_RT_SIGRETURN 139
-#define SYS_EXECVE 221
-#define SYS_CLONE 220
-#define SYS_SETITIMER 103
-
-#endif // __aarch64__
-#endif // __linux__
 
 extern long _syscall(long number, ...);
 
@@ -73,56 +42,12 @@ struct itimerval {
 	struct timeval it_value;
 };
 
-#ifndef __linux__
-union sigval {
-	int sival_int;
-	void *sival_ptr;
-};
-
-typedef struct {
-	int si_signo;
-	int si_code;
-	int si_errno;
-	union {
-		int _pad[29];
-		struct {
-			int _pid;
-			union {
-				struct {
-					unsigned int _uid;
-					union sigval _value;
-				} _kill;
-				struct {
-					long long _utime;
-					long long _stime;
-					int _status;
-				} _cld;
-			} _pdata;
-		} _proc;
-		struct {
-			void *_addr;
-			int _trapno;
-		} _fault;
-	} _data;
-} siginfo_t;
-
-struct sigaction {
-	union {
-		void (*__sa_handler)(int);
-		void (*__sa_sigaction)(int, siginfo_t *, void *);
-	} __sigaction_u;
-	unsigned int sa_mask;
-	int sa_flags;
-};
-
-#else
 struct sigaction {
 	void (*sa_handler)(int);
 	unsigned long sa_flags;
 	void (*sa_restorer) (void);
 	unsigned long sa_mask;
 };
-#endif // __linux__
 
 static char direction;
 static short location[23][79];
@@ -165,20 +90,14 @@ wait4(int wpid, int *status, int options, void *rusage)
 static void
 sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 {
-#ifndef __linux__
-	_syscall(SYS_SIGACTION, sig, act, oact);
-#else
 	_syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
-#endif // __linux__
 }
 
-#if defined(__linux__) && defined(__amd64__)
 static void
 sigreturn(void)
 {
 	_syscall(SYS_RT_SIGRETURN);
 }
-#endif // __linux__ && __amd64__
 
 static void
 execve(const char *path, char *const argv[], char *const envp[])
@@ -189,11 +108,7 @@ execve(const char *path, char *const argv[], char *const envp[])
 static long
 vfork(void)
 {
-#ifndef __linux__
-	return _syscall(SYS_VFORK);
-#else
-	return _syscall(SYS_CLONE, 17, 0, 0, 0, 0);  // 17 = SIGCHLD
-#endif // __linux__
+	return _syscall(SYS_FORK);
 }
 
 static void
@@ -229,17 +144,9 @@ timer(void (*cb)(int))
 	struct sigaction action;
 
 	action.sa_mask = 0;
-	action.sa_flags = 0;
-#ifndef __linux__
-	action.__sigaction_u.__sa_handler = cb;
-#else
-	action.sa_handler = cb;
-	action.sa_restorer = (void *) 0;
-#ifdef __amd64__
 	action.sa_flags = 0x04000000;   // SA_RESTORER
+	action.sa_handler = cb;
 	action.sa_restorer = &sigreturn;
-#endif // __amd64__
-#endif // __linux__
 
 	sigaction(14, &action, (void *) 0);
 }
