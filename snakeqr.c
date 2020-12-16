@@ -18,17 +18,6 @@
  * snakeqr -- game of snake that fits in a QR code
  */
 
-#define SYS_EXIT 93
-#define SYS_READ 63
-#define SYS_WRITE 64
-#define SYS_GETRANDOM 278
-#define SYS_WAIT4 260
-#define SYS_RT_SIGACTION 134
-#define SYS_RT_SIGRETURN 139
-#define SYS_EXECVE 221
-#define SYS_CLONE 220
-#define SYS_SETITIMER 103
-
 extern long _syscall(long number, ...);
 
 struct timeval {
@@ -59,56 +48,58 @@ static short snakelen;
 static void
 _exit(int status)
 {
-	_syscall(SYS_EXIT, status);
+	_syscall(93, status);
 }
 
 static long
 read(int d, void *buf, unsigned long nbytes)
 {
-	return _syscall(SYS_READ, d, buf, nbytes);
+	return _syscall(63, d, buf, nbytes);
 }
 
 static void
 write(int d, const void *buf, unsigned long nbytes)
 {
-	_syscall(SYS_WRITE, d, buf, nbytes);
+	_syscall(64, d, buf, nbytes);
 }
 
 static void
 getentropy(void *buf, unsigned long buflen)
 {
-	_syscall(SYS_GETRANDOM, buf, buflen, 0);
+	// getrandom with flags=0
+	_syscall(278, buf, buflen, 0);
 }
 
 static long
 wait4(int wpid, int *status, int options, void *rusage)
 {
-	return _syscall(SYS_WAIT4, wpid, status, options, rusage);
+	return _syscall(260, wpid, status, options, rusage);
 }
 
 static void
 sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 {
-	_syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
+	// rt_sigaction with sigsetsize=8
+	_syscall(134, sig, act, oact, 8);
 }
 
 static void
 execve(const char *path, char *const argv[], char *const envp[])
 {
-	_syscall(SYS_EXECVE, path, argv, envp);
+	_syscall(221, path, argv, envp);
 }
 
 static long
 vfork(void)
 {
 	// fork not available on aarch64, so we clone with flags=SIGCHLD
-	return _syscall(SYS_CLONE, 17, 0, 0, 0, 0);
+	return _syscall(220, 17, 0, 0, 0, 0);
 }
 
 static void
 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
 {
-	_syscall(SYS_SETITIMER, which, value, ovalue);
+	_syscall(103, which, value, ovalue);
 }
 
 static void
