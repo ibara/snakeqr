@@ -18,18 +18,6 @@
  * snakeqr -- game of snake that fits in a QR code
  */
 
-// syscall table
-#define SYS_EXIT 60
-#define SYS_READ 0
-#define SYS_WRITE 1
-#define SYS_GETRANDOM 318
-#define SYS_WAIT4 61
-#define SYS_RT_SIGACTION 13
-#define SYS_RT_SIGRETURN 15
-#define SYS_EXECVE 59
-#define SYS_FORK 57
-#define SYS_SETITIMER 38
-
 extern long _syscall(long number, ...);
 
 struct timeval {
@@ -60,61 +48,64 @@ static short snakelen;
 static void
 _exit(int status)
 {
-	_syscall(SYS_EXIT, status);
+	_syscall(60, status);
 }
 
 static long
 read(int d, void *buf, unsigned long nbytes)
 {
-	return _syscall(SYS_READ, d, buf, nbytes);
+	return _syscall(0, d, buf, nbytes);
 }
 
 static void
 write(int d, const void *buf, unsigned long nbytes)
 {
-	_syscall(SYS_WRITE, d, buf, nbytes);
+	_syscall(1, d, buf, nbytes);
 }
 
 static void
 getentropy(void *buf, unsigned long buflen)
 {
-	_syscall(SYS_GETRANDOM, buf, buflen, 0);
+	// getrandom with flags=0
+	_syscall(318, buf, buflen, 0);
 }
 
 static long
 wait4(int wpid, int *status, int options, void *rusage)
 {
-	return _syscall(SYS_WAIT4, wpid, status, options, rusage);
+	return _syscall(61, wpid, status, options, rusage);
 }
 
 static void
 sigaction(int sig, const struct sigaction *act, struct sigaction *oact)
 {
-	_syscall(SYS_RT_SIGACTION, sig, act, oact, 8);  // sigactsize = sizeof(sigset_t)
+	// rt_sigaction with sigsetsize=8
+	_syscall(13, sig, act, oact, 8);
 }
 
 static void
 sigreturn(void)
 {
-	_syscall(SYS_RT_SIGRETURN);
+	_syscall(15);
 }
 
 static void
 execve(const char *path, char *const argv[], char *const envp[])
 {
-	_syscall(SYS_EXECVE, path, argv, envp);
+	_syscall(59, path, argv, envp);
 }
 
 static long
 vfork(void)
 {
-	return _syscall(SYS_FORK);
+	// actually using fork, not vfork (so the child process can return)
+	return _syscall(57);
 }
 
 static void
 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue)
 {
-	_syscall(SYS_SETITIMER, which, value, ovalue);
+	_syscall(38, which, value, ovalue);
 }
 
 static void
