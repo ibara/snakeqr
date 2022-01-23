@@ -10,6 +10,13 @@ Here it is.
 This QR code is the compiled binary.
 The entire ELF executable clocks in at just under 2 KB (2024 bytes, to be exact).
 
+Directions
+---------
+h: left
+j: down
+k: up
+l: right
+
 Why?
 ----
 Read my
